@@ -3,20 +3,21 @@ class DebugString:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "string": ("STRING",),
+                "content": ("STRING",),
             },
         }
 
     OUTPUT_NODE = True
-    RETURN_TYPES = ()
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("content",)
     FUNCTION = "preview"
     CATEGORY = "TypeScript-CustomNode"
 
-    def preview(self, string: str):
-        print(f"{string=}")
+    def preview(self, content: str):
+        print(f"{content=}")
         return {
             "ui": {
-                "content": string,
+                "content": content,
             },
-            "result": (string,),
+            "result": (content,),
         }

@@ -1,33 +1,57 @@
 import { app } from '@comfyorg/comfyui-frontend/src/scripts/app';
+import { ComfyWidgets } from '@comfyorg/comfyui-frontend/src/scripts/widgets';
 import type { ComfyExtension } from '@comfyorg/comfyui-frontend/src/types/comfy';
 
-const NODE_TITLE_HEIGHT = 30;
-
 const extension: ComfyExtension = {
-  name: "TypeScript-CustomNode.DebugString",
-  beforeRegisterNodeDef: function async(nodeType, nodeData, _comfyApp) {
-    if (nodeData.name === 'DebugString') {
-      console.log(`Registering ${nodeData.name}`);
+	name: "TypeScript-CustomNode.DebugString",
+	async beforeRegisterNodeDef(nodeType, nodeData, app) {
+		if (nodeData.name === "DebugString") {
+			function debugString(content: string) {
+				if (this.widgets) {
+					for (let i = 1; i < this.widgets.length; i++) {
+						this.widgets[i].onRemove?.();
+					}
+					this.widgets.length = 1;
+				}
 
-      function draw(ctx: CanvasRenderingContext2D) {
-        console.log({ "this": this })
+				const v = [...content];
+				if (!v[0]) {
+					v.shift();
+				}
+				for (const list of v) {
+					const w = ComfyWidgets["STRING"](this, "text2", ["STRING", { multiline: true }], app).widget;
+					w.inputEl.readOnly = true;
+					w.inputEl.style.opacity = 0.6;
+					w.value = list;
+				}
 
-        const widgets_values = this.widgets_values;
-        console.log(`draw: ${widgets_values}`);
+				requestAnimationFrame(() => {
+					const sz = this.computeSize();
+					if (sz[0] < this.size[0]) {
+						sz[0] = this.size[0];
+					}
+					if (sz[1] < this.size[1]) {
+						sz[1] = this.size[1];
+					}
+					this.onResize?.(sz);
+					app.graph.setDirtyCanvas(true, false);
+				});
+			}
 
-        ctx.font = '12px sans-serif';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(widgets_values, 5, -NODE_TITLE_HEIGHT - 5);
-      }
+			const onExecuted = nodeType.prototype.onExecuted;
+			nodeType.prototype.onExecuted = function ({content}) {
+				onExecuted?.apply(this, arguments);
+				debugString.call(this, content);
+			};
 
-      const onDrawForeground = nodeType.prototype.onDrawForeground;
-      nodeType.prototype.onDrawForeground = function (ctx: CanvasRenderingContext2D) {
-        onDrawForeground?.apply(this, arguments);
-        console.log({ "BUG: this is not updated.": this, arguments })
-        draw.call(this, ctx);
-      };
-    }
-  }
-};
-
+			const onConfigure = nodeType.prototype.onConfigure;
+			nodeType.prototype.onConfigure = function () {
+				onConfigure?.apply(this, arguments);
+				if (this.widgets_values?.length) {
+					debugString.call(this, this.widgets_values.slice(+this.widgets_values.length > 1));
+				}
+			};
+		}
+	},
+}
 app.registerExtension(extension);
