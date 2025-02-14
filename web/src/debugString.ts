@@ -13,13 +13,9 @@ const extension: ComfyExtension = {
       node.widgets.slice(1).forEach(widget => widget.onRemove?.());
       node.widgets.length = 1;
 
-      const values = content ? [...content] : [];
-      console.log(values);
-
-      values.forEach(list => {
-        const inputName = "content2" // MUST NOT be same as the original widget input name.
-        node.addWidget('STRING', inputName, list, () => { }, ["STRING", { inputEl: { readOnly: true, style: { opacity: 0.6 } }, multiline: true }])
-      });
+      const inputName = "content2" // MUST NOT be same as the original widget input name.
+      // See https://github.com/jagenjo/litegraph.js/blob/master/guides/README.md#node-widgets
+      node.addWidget('text', inputName, content, (value, widget, node) => {}, {})
 
       requestAnimationFrame(() => {
         if (!node.size) return;

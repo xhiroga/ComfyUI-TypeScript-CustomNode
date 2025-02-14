@@ -7,13 +7,9 @@ const extension = {
       if (!node.widgets) return;
       node.widgets.slice(1).forEach((widget) => widget.onRemove?.());
       node.widgets.length = 1;
-      const values = content ? [...content] : [];
-      console.log(values);
-      values.forEach((list) => {
-        const inputName = "content2";
-        node.addWidget("STRING", inputName, list, () => {
-        }, ["STRING", { inputEl: { readOnly: true, style: { opacity: 0.6 } }, multiline: true }]);
-      });
+      const inputName = "content2";
+      node.addWidget("text", inputName, content, (value, widget, node2) => {
+      }, {});
       requestAnimationFrame(() => {
         if (!node.size) return;
         const sz = node.computeSize();
