@@ -1,57 +1,52 @@
 import { app } from '@comfyorg/comfyui-frontend/src/scripts/app';
 import { ComfyWidgets } from '@comfyorg/comfyui-frontend/src/scripts/widgets';
 import type { ComfyExtension } from '@comfyorg/comfyui-frontend/src/types/comfy';
+import { LGraphNode } from '@comfyorg/litegraph';
 
 const extension: ComfyExtension = {
-	name: "TypeScript-CustomNode.DebugString",
-	async beforeRegisterNodeDef(nodeType, nodeData, app) {
-		if (nodeData.name === "DebugString") {
-			function debugString(content: string) {
-				if (this.widgets) {
-					for (let i = 1; i < this.widgets.length; i++) {
-						this.widgets[i].onRemove?.();
-					}
-					this.widgets.length = 1;
-				}
+  name: "TypeScript-CustomNode.DebugString",
+  beforeRegisterNodeDef: async (nodeType, nodeData, app) => {
+    if (nodeData.name !== "DebugString") return;
 
-				const v = [...content];
-				if (!v[0]) {
-					v.shift();
-				}
-				for (const list of v) {
-					const w = ComfyWidgets["STRING"](this, "text2", ["STRING", { multiline: true }], app).widget;
-					w.inputEl.readOnly = true;
-					w.inputEl.style.opacity = 0.6;
-					w.value = list;
-				}
+    const debugString = (node: LGraphNode, content: string) => {
+      if (!node.widgets) return;
 
-				requestAnimationFrame(() => {
-					const sz = this.computeSize();
-					if (sz[0] < this.size[0]) {
-						sz[0] = this.size[0];
-					}
-					if (sz[1] < this.size[1]) {
-						sz[1] = this.size[1];
-					}
-					this.onResize?.(sz);
-					app.graph.setDirtyCanvas(true, false);
-				});
-			}
+      // 既存のウィジェットをクリア
+      node.widgets.slice(1).forEach(widget => widget.onRemove?.());
+      node.widgets.length = 1;
 
-			const onExecuted = nodeType.prototype.onExecuted;
-			nodeType.prototype.onExecuted = function ({content}) {
-				onExecuted?.apply(this, arguments);
-				debugString.call(this, content);
-			};
+      const values = content ? [...content] : [];
+      values.forEach(list => {
+        const w = ComfyWidgets["STRING"](node, "content", ["STRING", { multiline: true }], app).widget;
+        w.inputEl.readOnly = true;
+        w.inputEl.style.opacity = "0.6";
+        w.value = list;
+      });
 
-			const onConfigure = nodeType.prototype.onConfigure;
-			nodeType.prototype.onConfigure = function () {
-				onConfigure?.apply(this, arguments);
-				if (this.widgets_values?.length) {
-					debugString.call(this, this.widgets_values.slice(+this.widgets_values.length > 1));
-				}
-			};
-		}
-	},
-}
+      requestAnimationFrame(() => {
+        if (!node.size) return;
+        const sz = node.computeSize();
+        sz[0] = Math.max(sz[0], node.size[0]);
+        sz[1] = Math.max(sz[1], node.size[1]);
+        node.onResize?.(sz);
+        app.graph.setDirtyCanvas(true, false);
+      });
+    };
+
+    const originalOnExecuted = nodeType.prototype.onExecuted;
+    nodeType.prototype.onExecuted = function (data) {
+      originalOnExecuted?.apply(this, arguments);
+      debugString(this, data.content);
+    };
+
+    const originalOnConfigure = nodeType.prototype.onConfigure;
+    nodeType.prototype.onConfigure = function () {
+      originalOnConfigure?.apply(this, arguments);
+      if (this.widgets_values?.length > 1) {
+        debugString(this, this.widgets_values.slice(1));
+      }
+    };
+  },
+};
+
 app.registerExtension(extension);
