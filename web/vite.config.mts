@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import inject from '@rollup/plugin-inject';
 
 export default defineConfig({
   base: '',
@@ -13,19 +14,12 @@ export default defineConfig({
     target: 'es2022',
     minify: false,
     rollupOptions: {
-      external: (id) => {
-        return id.startsWith('@comfyorg/comfyui-frontend')
-      },
-      output: {
-        paths: (id) => {
-          if (id.startsWith('@comfyorg/comfyui-frontend/src/scripts/')) {
-            const parts = id.split('/');
-            const moduleName = parts[parts.length - 1];
-            return `../../scripts/${moduleName}.js`;
-          }
-          return id;
-        }
-      }
+      external: (id) => id.startsWith('../../scripts/'),
+      plugins: [
+        inject({
+          app: ['../../scripts/app.js', 'app']
+        })
+      ],
     }
   },
   resolve: {

@@ -1,5 +1,4 @@
 import { app } from "../../scripts/app.js";
-import { ComfyWidgets } from "../../scripts/widgets.js";
 const extension = {
   name: "TypeScript-CustomNode.DebugString",
   beforeRegisterNodeDef: async (nodeType, nodeData, app2) => {
@@ -9,12 +8,11 @@ const extension = {
       node.widgets.slice(1).forEach((widget) => widget.onRemove?.());
       node.widgets.length = 1;
       const values = content ? [...content] : [];
+      console.log(values);
       values.forEach((list) => {
         const inputName = "content2";
-        const w = ComfyWidgets["STRING"](node, inputName, ["STRING", { multiline: true }], app2).widget;
-        w.inputEl.readOnly = true;
-        w.inputEl.style.opacity = "0.6";
-        w.value = list;
+        node.addWidget("STRING", inputName, list, () => {
+        }, ["STRING", { inputEl: { readOnly: true, style: { opacity: 0.6 } }, multiline: true }]);
       });
       requestAnimationFrame(() => {
         if (!node.size) return;

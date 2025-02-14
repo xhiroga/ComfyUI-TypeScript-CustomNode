@@ -1,7 +1,5 @@
 // Modified from https://github.com/pythongosssss/ComfyUI-Custom-Scripts/blob/main/web/js/showText.js
-import { app } from '@comfyorg/comfyui-frontend/src/scripts/app';
-import { ComfyWidgets } from '@comfyorg/comfyui-frontend/src/scripts/widgets';
-import type { ComfyExtension } from '@comfyorg/comfyui-frontend/src/types/comfy';
+import { ComfyExtension } from '@comfyorg/comfyui-frontend-types'
 import { LGraphNode } from '@comfyorg/litegraph';
 
 const extension: ComfyExtension = {
@@ -16,12 +14,11 @@ const extension: ComfyExtension = {
       node.widgets.length = 1;
 
       const values = content ? [...content] : [];
+      console.log(values);
+
       values.forEach(list => {
         const inputName = "content2" // MUST NOT be same as the original widget input name.
-        const w = ComfyWidgets["STRING"](node, inputName, ["STRING", { multiline: true }], app).widget;
-        w.inputEl.readOnly = true;
-        w.inputEl.style.opacity = "0.6";
-        w.value = list;
+        node.addWidget('STRING', inputName, list, () => { }, ["STRING", { inputEl: { readOnly: true, style: { opacity: 0.6 } }, multiline: true }])
       });
 
       requestAnimationFrame(() => {

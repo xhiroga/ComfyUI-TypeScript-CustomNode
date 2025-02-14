@@ -28,6 +28,6 @@
   },
   "include": [
     "src/**/*",
-    "node_modules/@comfyorg/comfyui-frontend/src/types/**/*"
+    "node_modules/@comfyorg/comfyui-frontend-types"
   ]
 }
