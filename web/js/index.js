@@ -4,37 +4,36 @@ const extension = {
   name: "TypeScript-CustomNode.DebugString",
   beforeRegisterNodeDef: async (nodeType, nodeData, app2) => {
     if (nodeData.name !== "DebugString") return;
-    const debugString = (nodeInstance, content) => {
-      if (!nodeInstance.widgets) return;
-      nodeInstance.widgets.slice(1).forEach((widget) => widget.onRemove?.());
-      nodeInstance.widgets.length = 1;
+    const debugString = (node, content) => {
+      if (!node.widgets) return;
+      node.widgets.slice(1).forEach((widget) => widget.onRemove?.());
+      node.widgets.length = 1;
       const values = content ? [...content] : [];
       values.forEach((list) => {
-        const w = ComfyWidgets["STRING"](nodeInstance, "content", ["STRING", { multiline: true }], app2).widget;
+        const inputName = "content2";
+        const w = ComfyWidgets["STRING"](node, inputName, ["STRING", { multiline: true }], app2).widget;
         w.inputEl.readOnly = true;
         w.inputEl.style.opacity = "0.6";
         w.value = list;
       });
       requestAnimationFrame(() => {
-        if (!nodeInstance.size) return;
-        const sz = nodeInstance.computeSize();
-        sz[0] = Math.max(sz[0], nodeInstance.size[0]);
-        sz[1] = Math.max(sz[1], nodeInstance.size[1]);
-        nodeInstance.onResize?.(sz);
+        if (!node.size) return;
+        const sz = node.computeSize();
+        sz[0] = Math.max(sz[0], node.size[0]);
+        sz[1] = Math.max(sz[1], node.size[1]);
+        node.onResize?.(sz);
         app2.graph.setDirtyCanvas(true, false);
       });
     };
     const originalOnExecuted = nodeType.prototype.onExecuted;
-    nodeType.prototype.onExecuted = function(data) {
+    nodeType.prototype.onExecuted = function(message) {
       originalOnExecuted?.apply(this, arguments);
-      debugString(this, data.content);
+      debugString(this, message.content);
     };
     const originalOnConfigure = nodeType.prototype.onConfigure;
     nodeType.prototype.onConfigure = function() {
       originalOnConfigure?.apply(this, arguments);
-      if (this.widgets_values?.length > 1) {
-        debugString(this, this.widgets_values.slice(1));
-      }
+      debugString(this, this.widgets_values[0]);
     };
   }
 };

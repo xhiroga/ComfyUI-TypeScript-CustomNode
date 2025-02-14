@@ -1,3 +1,4 @@
+// Modified from https://github.com/pythongosssss/ComfyUI-Custom-Scripts/blob/main/web/js/showText.js
 import { app } from '@comfyorg/comfyui-frontend/src/scripts/app';
 import { ComfyWidgets } from '@comfyorg/comfyui-frontend/src/scripts/widgets';
 import type { ComfyExtension } from '@comfyorg/comfyui-frontend/src/types/comfy';
@@ -11,13 +12,13 @@ const extension: ComfyExtension = {
     const debugString = (node: LGraphNode, content: string) => {
       if (!node.widgets) return;
 
-      // 既存のウィジェットをクリア
       node.widgets.slice(1).forEach(widget => widget.onRemove?.());
       node.widgets.length = 1;
 
       const values = content ? [...content] : [];
       values.forEach(list => {
-        const w = ComfyWidgets["STRING"](node, "content", ["STRING", { multiline: true }], app).widget;
+        const inputName = "content2" // MUST NOT be same as the original widget input name.
+        const w = ComfyWidgets["STRING"](node, inputName, ["STRING", { multiline: true }], app).widget;
         w.inputEl.readOnly = true;
         w.inputEl.style.opacity = "0.6";
         w.value = list;
@@ -34,17 +35,16 @@ const extension: ComfyExtension = {
     };
 
     const originalOnExecuted = nodeType.prototype.onExecuted;
-    nodeType.prototype.onExecuted = function (data) {
+    nodeType.prototype.onExecuted = function (message) {
       originalOnExecuted?.apply(this, arguments);
-      debugString(this, data.content);
+      debugString(this, message.content);
     };
 
     const originalOnConfigure = nodeType.prototype.onConfigure;
     nodeType.prototype.onConfigure = function () {
       originalOnConfigure?.apply(this, arguments);
-      if (this.widgets_values?.length > 1) {
-        debugString(this, this.widgets_values.slice(1));
-      }
+      // this.widgets_values is an array of input values
+      debugString(this, this.widgets_values[0] as string);
     };
   },
 };
