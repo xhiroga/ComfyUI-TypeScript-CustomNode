@@ -1,0 +1,14 @@
+[project]
+name = "ComfyUI-TypeScript-CustomNode" # FIXME
+description = "This project is generated from xhiroga/ComfyUI-TypeScript-CustomNode"
+version = "1.0.0"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/xhiroga/ComfyUI-TypeScript-CustomNode" # FIXME
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.setuptools.packages.find]
+exclude = ["web"]

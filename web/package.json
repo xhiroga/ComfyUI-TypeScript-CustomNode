@@ -1,0 +1,15 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "description": "This project is generated from xhiroga/ComfyUI-TypeScript-CustomNode",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@comfyorg/comfyui-frontend": "github:Comfy-Org/ComfyUI_frontend#main",
+    "@types/node": "^22.13.4",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
+  }
+}
