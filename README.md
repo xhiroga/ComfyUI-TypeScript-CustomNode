@@ -12,6 +12,6 @@ This is a template for developing ComfyUI custom nodes in TypeScript with type s
 ### Commands
 
 ```shell
-make install # Note: Due to the heavy ComfyUI_frontend repository, the first install may take a few minutes.
+make install
 make dev
 ```
