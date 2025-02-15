@@ -7,7 +7,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@comfyorg/comfyui-frontend-types": "^1.9.16",
+    "@comfyorg/comfyui-frontend-types": "^1.10.0",
     "@comfyorg/litegraph": "^0.8.78",
     "@types/node": "^22.13.4",
     "typescript": "^5.7.3",
